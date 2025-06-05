@@ -3,6 +3,12 @@ import json
 import websockets
 import uuid
 import time
+import logging
+import sys
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 MAX_PLAYERS = 6
 
@@ -42,23 +48,23 @@ class Room:
             "started": False,
             "level": 1
         }
-        print(f"🏠 Room {room_id} created with host {host_client.id}")
+        logger.info(f"🏠 Room {room_id} created with host {host_client.id}")
         
     def add_client(self, client):
         if len(self.clients) >= MAX_PLAYERS:
             return False
         self.clients[client.id] = client
         client.room_id = self.id
-        print(f"👥 Client {client.id} joined room {self.id} ({len(self.clients)}/{MAX_PLAYERS})")
+        logger.info(f"👥 Client {client.id} joined room {self.id} ({len(self.clients)}/{MAX_PLAYERS})")
         return True
         
     def remove_client(self, client_id):
         if client_id in self.clients:
             client = self.clients.pop(client_id)
-            print(f"👋 Client {client_id} left room {self.id}")
+            logger.info(f"👋 Client {client_id} left room {self.id}")
             # If host leaves, close the room
             if client.role == "host":
-                print(f"🏠 Host left, closing room {self.id}")
+                logger.info(f"🏠 Host left, closing room {self.id}")
                 return "close_room"
         return "continue"
         
@@ -85,7 +91,11 @@ class Room:
 async def register_client(websocket):
     client = Client(websocket)
     CLIENTS[websocket] = client
-    print(f"🔗 Client {client.id} connected from {websocket.remote_address}")
+    try:
+        address = websocket.remote_address
+    except:
+        address = "unknown"
+    logger.info(f"🔗 Client {client.id} connected from {address}")
     return client
 
 async def unregister_client(websocket):
@@ -93,7 +103,7 @@ async def unregister_client(websocket):
         return
         
     client = CLIENTS.pop(websocket)
-    print(f"🔌 Client {client.id} disconnected")
+    logger.info(f"🔌 Client {client.id} disconnected")
     
     if client.room_id and client.room_id in ROOMS:
         room = ROOMS[client.room_id]
@@ -110,7 +120,7 @@ async def unregister_client(websocket):
                 await asyncio.gather(*disconnect_tasks, return_exceptions=True)
             
             del ROOMS[client.room_id]
-            print(f"🗑️ Room {client.room_id} deleted")
+            logger.info(f"🗑️ Room {client.room_id} deleted")
 
 async def notify_room_closed(client):
     try:
@@ -119,7 +129,7 @@ async def notify_room_closed(client):
         }))
         await client.websocket.close()
     except Exception as e:
-        print(f"Error notifying client {client.id}: {e}")
+        logger.error(f"Error notifying client {client.id}: {e}")
 
 async def handle_join(client, data):
     role = data.get("role", "client")
@@ -129,7 +139,7 @@ async def handle_join(client, data):
     client.role = role
     client.username = username
     
-    print(f"📋 Join request: {role} wanting room {room_id} as {username}")
+    logger.info(f"📋 Join request: {role} wanting room {room_id} as {username}")
     
     if role == "host":
         # Create new room
@@ -152,7 +162,7 @@ async def handle_join(client, data):
             "success": True
         }
         await client.websocket.send(json.dumps(response))
-        print(f"✅ Room {room_id} created successfully for host {client.id}")
+        logger.info(f"✅ Room {room_id} created successfully for host {client.id}")
         
     else:
         # Join existing room
@@ -177,7 +187,7 @@ async def handle_join(client, data):
             "playerCount": len(room.clients)
         }
         await client.websocket.send(json.dumps(response))
-        print(f"✅ Client {client.id} joined room {room_id} successfully")
+        logger.info(f"✅ Client {client.id} joined room {room_id} successfully")
         
         # Notify host about new player
         try:
@@ -188,7 +198,7 @@ async def handle_join(client, data):
                 "playerCount": len(room.clients)
             }))
         except Exception as e:
-            print(f"Error notifying host: {e}")
+            logger.error(f"Error notifying host: {e}")
 
 async def handle_player_update(client, data):
     if not client.room_id:
@@ -230,7 +240,7 @@ async def handle_start_game(client, data):
     room = ROOMS[client.room_id]
     room.game_state["started"] = True
     
-    print(f"🎮 Game started in room {client.room_id}")
+    logger.info(f"🎮 Game started in room {client.room_id}")
     
     # Broadcast game start to all clients in room
     message = json.dumps({
@@ -250,7 +260,7 @@ async def handle_broadcast(client, data):
         return
         
     room = ROOMS[client.room_id]
-    broadcast_data = data.get("data", {})
+    broadcast_data = data.get("data", "")
     
     message = json.dumps({
         "type": "hostBroadcast",
@@ -272,10 +282,11 @@ async def safe_send(client, message):
     except websockets.exceptions.ConnectionClosed:
         return False
     except Exception as e:
-        print(f"Send error to {client.id}: {e}")
+        logger.error(f"Send error to {client.id}: {e}")
         return False
 
-async def handler(websocket, path):
+async def connection_handler(websocket, path=None):
+    """Main connection handler that works with different websockets versions"""
     client = await register_client(websocket)
     
     try:
@@ -295,17 +306,17 @@ async def handler(websocket, path):
                 elif msg_type == "broadcast":
                     await handle_broadcast(client, data)
                 else:
-                    print(f"❓ Unknown message type from {client.id}: {msg_type}")
+                    logger.warning(f"❓ Unknown message type from {client.id}: {msg_type}")
                     
             except json.JSONDecodeError:
-                print(f"💥 Invalid JSON from client {client.id}")
+                logger.error(f"💥 Invalid JSON from client {client.id}")
             except Exception as e:
-                print(f"💥 Error handling message from {client.id}: {e}")
+                logger.error(f"💥 Error handling message from {client.id}: {e}")
                 
     except websockets.exceptions.ConnectionClosed:
         pass
     except Exception as e:
-        print(f"💥 Connection error with {client.id}: {e}")
+        logger.error(f"💥 Connection error with {client.id}: {e}")
     finally:
         await unregister_client(websocket)
 
@@ -354,30 +365,46 @@ async def broadcaster():
             # Remove empty rooms
             for room_id in rooms_to_remove:
                 del ROOMS[room_id]
-                print(f"🗑️ Removed empty room {room_id}")
+                logger.info(f"🗑️ Removed empty room {room_id}")
                         
         except Exception as e:
-            print(f"💥 Broadcaster error: {e}")
+            logger.error(f"💥 Broadcaster error: {e}")
             
         await asyncio.sleep(1/30)  # 30 FPS
 
 async def main():
-    print("🚀 Starting multiplayer server...")
-    print(f"📊 Max players per room: {MAX_PLAYERS}")
+    logger.info("🚀 Starting multiplayer server...")
+    logger.info(f"📊 Max players per room: {MAX_PLAYERS}")
+    logger.info(f"🐍 Python version: {sys.version}")
     
-    # Start the WebSocket server
-    start_server = websockets.serve(handler, "0.0.0.0", 8000)
-    
-    print("🌐 Server running on ws://0.0.0.0:8000")
-    print("📱 Local access: ws://localhost:8000")
-    print("🔗 Network access: ws://[your-ip]:8000")
-    print("=" * 50)
-    
-    # Run server and broadcaster concurrently
-    await asyncio.gather(
-        start_server,
-        broadcaster()
-    )
+    try:
+        # Check websockets version and use appropriate handler
+        import websockets
+        logger.info(f"📦 Websockets version: {websockets.__version__}")
+        
+        # Start the WebSocket server
+        start_server = websockets.serve(connection_handler, "0.0.0.0", 8765)
+        
+        logger.info("🌐 Server running on ws://0.0.0.0:8765")
+        logger.info("📱 Local access: ws://localhost:8765")
+        logger.info("🔗 Network access: ws://[your-ip]:8765")
+        logger.info("=" * 50)
+        
+        # Run server and broadcaster concurrently
+        await asyncio.gather(
+            start_server,
+            broadcaster()
+        )
+        
+    except Exception as e:
+        logger.error(f"💥 Failed to start server: {e}")
+        raise
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("👋 Server shutting down...")
+    except Exception as e:
+        logger.error(f"💥 Server crashed: {e}")
+        sys.exit(1)
