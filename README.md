@@ -32,7 +32,7 @@ The project is designed to be played by multiple players, where each player can 
 
 1.  Clone this repository:
     ```bash
-    git clone [https://github.com/yourusername/picoParkClone.git](https://github.com/yourusername/picoParkClone.git)
+    git clone https://github.com/reinoyk/Pico-Park-Clone
     ```
 2.  Navigate to the project directory:
     ```bash
