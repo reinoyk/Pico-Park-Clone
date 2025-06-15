@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="./assets/imgs/favicon.png">
+    <title>Pico Park V2</title>
+    <style>
+        /* ===== Background & layout ===== */
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: sans-serif;
+            color: #fff;
+            background: url('./assets/imgs/background.jpg') no-repeat center center / cover;
+        }
+
+        /* ===== Headings ===== */
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* ===== Buttons & Inputs ===== */
+        button, input[type="text"] {
+            padding: 10px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        button {
+            background-color: #ff9800;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        button:hover {
+            background-color: #ffa726;
+        }
+
+        input[type="text"] {
+            width: 150px;
+            text-align: center;
+        }
+
+        /* ===== Link to Level Editor ===== */
+        a {
+            color: #ff9800;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== Divider ===== */
+        hr {
+            width: 50%;
+            border: 1px solid rgba(255,255,255,0.2);
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pico Park V2</h1>
+    Host Game 
+    <button onClick="(function(){
+        let username = document.getElementById('usernameInpt').value || 'Host'
+        localStorage.setItem('username', username)
+        window.open('./game.html?mode=host&room=new','_self')
+        return false;
+    })();return false;">Create Room</button><br>
+    <hr>
+    <b>Join Room</b><br>
+    Username 
+    <input id="usernameInpt" onchange="(function(){
+        localStorage.setItem('username', document.getElementById('usernameInpt').value)
+        return false;
+    })();return false;" type="text"><br>
+    <script>
+        let name = localStorage.getItem("username")
+        name = name||""
+        document.getElementById("usernameInpt").value = name
+    </script>
+    Room Code 
+    <input id="codeinpt" type="text">
+    <button onClick="(function(){
+        let username = document.getElementById('usernameInpt').value || 'Player'
+        let roomCode = getCode().toUpperCase()
+        localStorage.setItem('username', username)
+        window.open(`./game.html?room=${roomCode}&mode=join`,'_self')
+        return false;
+    })();return false;" id="joinButton">Join</button>
+    <script>
+        let input = document.getElementById("codeinpt")
+        input.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                document.getElementById("joinButton").click();
+            }
+        });
+    </script>
+
+    <br><br><a href="./lvl.html">[Level Editor]</a>
+
+    <script>
+        function getCode(){return document.getElementById("codeinpt").value}
+    </script>
+</body>
+</html>

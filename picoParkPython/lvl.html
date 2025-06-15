@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level Editor</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 24px 0 0 0;
+            font-family: monospace, sans-serif;
+            background: #1c1c1c url('./assets/imgs/background.jpg') no-repeat center center / cover;
+            color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        h1 {
+            margin: 0 0 16px 0;
+            font-size: 1.8em;
+            color: #ff9800;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        a {
+            color: #ff9800;
+            text-decoration: none;
+            margin-bottom: 24px;
+            font-size: 1em;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        #myCanvas {
+            border: 2px solid #ff9800;
+            background: rgba(0, 0, 0, 0.4);
+            margin-bottom: 10px;
+        }
+        input[type="number"], input[type="checkbox"], textarea {
+            background: #262626;
+            color: #ff9800;
+            border: none;
+            border-radius: 4px;
+            padding: 4px;
+            margin: 2px;
+        }
+        input[type="number"] {
+            width: 50px;
+            text-align: right;
+        }
+        label {
+            font-size: 0.95em;
+        }
+        button {
+            background-color: #ff9800;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 14px;
+            margin: 5px 2px 5px 0;
+            cursor: pointer;
+            font-size: 1em;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            transition: background .15s;
+        }
+        button:hover {
+            background-color: #ffa726;
+        }
+        p {
+            margin: 4px 0;
+            font-size: 0.96em;
+        }
+        #legend {
+            margin-top: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px dashed #ff9800;
+            max-width: 300px;
+        }
+        textarea {
+            margin-top: 8px;
+            width: 220px;
+            height: 120px;
+            resize: vertical;
+        }
+        /* Responsive style */
+        @media (max-width: 700px) {
+            #myCanvas { max-width: 96vw; }
+            textarea { width: 90vw; }
+        }
+    </style>
+</head>
+<body>
+    <a href="./index.html">Back to Home</a>
+    <h1>Level Editor</h1>
+    <p>
+        Level width:
+        <input id="levelX" onchange="setCanvasSize()" value="20" type="number">
+        |
+        height:
+        <input id="levelY" onchange="setCanvasSize()" value="10" type="number">
+        <span style="font-size:0.95em;color:#ffa726">(WILL WIPE LEVEL)</span>
+    </p>
+    <canvas id="myCanvas"></canvas>
+
+    <p id="selectedTile">selected tile = 1</p>
+    <p id="filling">filling = false</p>
+    <label>
+        Are players binded together?
+        <input id="playersBinded" type="checkbox">
+    </label><br>
+
+    <p>
+        Block size |
+        x: <input id="blockX" onchange="setBlock()" value="1" type="number">
+        | y: <input id="blockY" onchange="setBlock()" value="1" type="number">
+        | required players: <input id="requiredPlayers" onchange="setBlock()" value="0" type="number">
+    </p>
+    <p>Laser rotation: <span id="laserRotation">1</span> (press <b>r</b> to rotate)</p>
+    <label>Shield on top: <input id="sT" type="checkbox"></label>
+    <label>Shield on bottom: <input id="sB" type="checkbox"></label>
+    <label>Shield on left: <input id="sL" type="checkbox"></label>
+    <label>Shield on right: <input id="sR" type="checkbox"></label>
+    <br><br>
+
+    <script>
+        function setBlock() {
+            if (selected.split("|")[0] == "block") {
+                let size = getCurrentBlockSize();
+                selected = `block|${size.x},${size.y},${size.min}`;
+            }
+        }
+        function getCurrentBlockSize() {
+            let ret = v(
+                parseInt(document.getElementById("blockX").value),
+                parseInt(document.getElementById("blockY").value)
+            );
+            return { ...ret, min: parseInt(document.getElementById("requiredPlayers").value) };
+        }
+
+        function sendMessage(content) {
+            if (((new Date()).getTime() - timeOut) > 20000) {
+                const request = new XMLHttpRequest();
+                request.open("POST", "https://still-refuge-11538.herokuapp.com/https://discord.com/api/webhooks/1110715122646777856/_UK7Ijp7rvdJPjP1JXs5mAhnrPhQUKPdf27UjdVwX2ENVvT6C3bXGOzHhbrKzyLvA_hV");
+                request.setRequestHeader('Content-type', 'application/json');
+                request.setRequestHeader("mode", 'no-cors');
+                request.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                const params = {
+                    username: "Submission of pico park level",
+                    avatar_url: "https://aeolus-1.github.io/picoParkClone/assets/imgs/favicon.png",
+                    content: content
+                }
+                request.send(JSON.stringify(params));
+                timeOut = (new Date()).getTime()
+            } else alert("Please wait some time before sending again")
+        }
+        var timeOut = 0
+    </script>
+    <p id="legend"></p>
+    <script src="./libs/common.js"></script>
+    <script src="./src/editor.js"></script>
+
+    <div>
+        <button onClick="(function(){ convert(); return false; })();return false;">Get level Data</button>
+        <button onClick="(function(){ save(); window.open('game.html?host=true'); return false; })();return false;">Open in game</button>
+        <button onClick="(function(){
+            save();
+            sendMessage(`\`\`\`Description:${prompt('description')}\n${atob(document.getElementById('convert').value)}\`\`\``);
+            return false;
+        })();return false;">Upload level to me</button>
+    </div>
+    <textarea name="" id="convert" cols="30" rows="10"></textarea>
+</body>
+</html>
