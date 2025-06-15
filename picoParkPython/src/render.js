@@ -181,13 +181,10 @@ class Renderer {
         }
 
         // --- Render Username ---
-        let username = player.username 
-            || (player.conn ? player.conn.clientUsername : null)
-            || "Player";
+        let username = player.username || (player.conn ? player.conn.clientUsername : null) || "Player"; // masi harus dibenerin, nama player blm muncul
         this.ctx.save();
-        this.ctx.font = "18px squareforced, sans-serif";
-        this.ctx.fillStyle = "#222";
-        this.ctx.strokeStyle = "#fff";
+        this.ctx.font = "14px squareforced, sans-serif";
+        this.ctx.fillStyle = "#fff";
         this.ctx.lineWidth = 3;
 
         // Posisi di atas kepala sprite

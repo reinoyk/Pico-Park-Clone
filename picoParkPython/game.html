@@ -155,10 +155,6 @@
         <div id="host" style="display: none;">
             <div id="gameDetails">
                 <div id="gameCode">Code: <b id="roomCode">fetching</b><span id="incoming"></span></div>
-                <a id="copyLink" href="#" onclick="(function(){
-                    navigator.clipboard.writeText(`${window.location.origin}/game.html?room=${gameClient.roomId}`);
-                    return false;
-                })();return false;">[Copy Link]</a>
             </div>
             <div id="memberList">
                 <h2>Members:</h2>
