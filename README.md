@@ -1,58 +1,106 @@
-# **Pico Park Clone: Multiplayer Game**
+<div id="top">
 
-## **Project Overview**
+<!-- HEADER STYLE: CLASSIC -->
+<div align="center">
+
+
+# PICO-PARK-CLONE
+
+<em>Unite, Play, Conquer: Redefining Multiplayer Fun</em>
+
+<!-- BADGES -->
+<img src="https://img.shields.io/github/last-commit/reinoyk/Pico-Park-Clone?style=flat&logo=git&logoColor=white&color=0080ff" alt="last-commit">
+<img src="https://img.shields.io/github/languages/top/reinoyk/Pico-Park-Clone?style=flat&color=0080ff" alt="repo-top-language">
+<img src="https://img.shields.io/github/languages/count/reinoyk/Pico-Park-Clone?style=flat&color=0080ff" alt="repo-language-count">
+
+<em>Built with the tools and technologies:</em>
+
+<img src="https://img.shields.io/badge/Markdown-000000.svg?style=flat&logo=Markdown&logoColor=white" alt="Markdown">
+<img src="https://img.shields.io/badge/JavaScript-F7DF1E.svg?style=flat&logo=JavaScript&logoColor=black" alt="JavaScript">
+<img src="https://img.shields.io/badge/Python-3776AB.svg?style=flat&logo=Python&logoColor=white" alt="Python">
+
+</div>
+<br>
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Usage](#usage)
+    - [Testing](#testing)
+
+---
+
+## Overview
 
 This project is a **Pico Park Clone**, a multiplayer cooperative puzzle game. Players collaborate to solve various puzzles, each player controlling a character to complete objectives. The game utilizes **Python** for the backend with **Socket Programming** for networking, and **JavaScript** for the frontend to handle game logic and rendering.
 
 The project is designed to be played by multiple players, where each player can join a room and interact with other players in real-time.
 
+**Why Pico-Park-Clone?**
+
+This project empowers developers to build engaging, collaborative multiplayer experiences with ease. The core features include:
+
+- 🧩 **🌐 WebSocket & WebRTC Communication:** Facilitates real-time, peer-to-peer multiplayer interactions.
+- 🎮 **🖥️ Desktop App Integration:** Uses PyWebView to run the game as a standalone desktop application.
+- 🛠️ **📝 Level Editor & Customization:** Provides web-based tools for designing and sharing game levels.
+- ⚙️ **🧪 Physics Simulation:** Leverages Matter.js for realistic interactions and environment dynamics.
+- 🚀 **🔌 Modular Architecture:** Supports dynamic module loading and scalable development.
+
 ---
-
-## **Key Features**
-
--   **Multiplayer Support**: Multiple players can join the same game room and interact with each other.
--   **Real-Time Communication**: Players' positions and actions are synchronized in real-time using WebSockets.
--   **Room Management**: Players can create and join rooms using unique room codes.
--   **Dynamic Rendering**: The game features dynamic rendering of player movements and interactions.
-
----
-
-## **Technologies Used**
+**Technologies Used**
 
 -   **Python (Socket Programming)**: The backend for handling game state, player connections, and real-time synchronization.
 -   **JavaScript**: Handles the frontend, including rendering, player inputs, and real-time updates.
 -   **WebSocket**: For real-time communication between the server and clients.
 -   **HTML/CSS**: For structuring and styling the game pages.
 
----
+## Getting Started
 
-## **Installation**
+### Prerequisites
 
-### **Backend Setup (Python)**
+This project requires the following dependencies:
 
-1.  Clone this repository:
-    ```bash
-    git clone https://github.com/reinoyk/Pico-Park-Clone
-    ```
-2.  Navigate to the project directory:
-    ```bash
-    cd picoParkClone
-    ```
-3.  Install necessary dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-4.  Run the server:
-    ```bash
-    python server.py
+- **Programming Language:** JavaScript
+- **Package Manager:** Npm
+
+### Installation
+
+Build Pico-Park-Clone from the source and install dependencies:
+
+1. **Clone the repository:**
+
+    ```sh
+    ❯ git clone https://github.com/reinoyk/Pico-Park-Clone
     ```
 
-### **Frontend Setup (JavaScript)**
+2. **Navigate to the project directory:**
 
-1.  Ensure that the `www` folder is correctly served by your web server.
-2.  Open the `index.html` or `game.html` in a browser to start the game.
+    ```sh
+    ❯ cd Pico-Park-Clone
+    ```
 
----
+3. **Install the dependencies:**
+
+**Using [npm](https://www.npmjs.com/):**
+
+```sh
+❯ npm install
+```
+
+### Usage
+
+Run the project with:
+
+**Using [npm](https://www.npmjs.com/):**
+
+```sh
+npm start
+```
 
 ## **How to Play**
 
@@ -70,13 +118,3 @@ The project is designed to be played by multiple players, where each player can 
 -   **Frontend Rendering**: The frontend receives real-time updates and renders the game state accordingly, including player positions and interactions.
 
 ---
-
-## **Code Structure**
-
--   `server.py`: The server-side code handling room management, player connections, and state synchronization.
--   `app.py`: Main entry point to run the backend server and initialize WebSocket connections.
--   `www/`: The frontend directory containing HTML, CSS, JS files, and assets used to render the game in the browser.
-    -   `index.html`: Main game page where players can join or create rooms.
-    -   `game.html`: Gameplay screen where real-time interactions happen.
--   `src/`: JavaScript files managing the game logic and rendering.
--   `assets/`: Images, fonts, and other assets used in the game.
