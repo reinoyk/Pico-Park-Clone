@@ -44,6 +44,10 @@ class LevelHandler {
         
     }
     loadLevel(dat, name) {
+        for (let i = 0; i < this.game.players.length; i++) {
+            this.game.players[i].atExit = false;
+        }
+
         var levelData = dat,
     
             cellsize = v(50,50),
