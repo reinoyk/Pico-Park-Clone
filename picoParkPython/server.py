@@ -45,6 +45,7 @@ class Room:
         return [
             {
                 "id": p.id,
+                "username": p.username,
                 "position": p.position,
                 "direction": p.direction,
                 "keys": p.keys,
