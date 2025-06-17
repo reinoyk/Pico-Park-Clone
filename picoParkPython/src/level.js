@@ -41,11 +41,14 @@ class LevelHandler {
         if (window.hostConnection) {
             window.hostConnection.broadcast(JSON.stringify({restartLevel:true}))
         }
+
         
     }
     loadLevel(dat, name) {
+        // Reset semua flag door/exit per player
         for (let i = 0; i < this.game.players.length; i++) {
             this.game.players[i].atExit = false;
+            this.game.players[i].enteredDoor = false;  // <- TAMBAH INI!
         }
 
         var levelData = dat,
