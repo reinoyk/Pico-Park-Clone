@@ -94,6 +94,8 @@ class GameManager {
         
         // Update keys for movement animation
         gamePlayer.keys = serverData.keys
+
+        gamePlayer.username = serverData.username || "Player"
     }
     
     findPlayerById(id) {
