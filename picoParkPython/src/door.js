@@ -17,37 +17,40 @@ class Door {
         // Fungsi onIn akan dijalankan saat player dalam trigger area door
         this.onIn = (e) => {
             let rect = this.trigger.rect.bounds,
-                playerBody = e.bounds;
-            if (this.open) {
-                // Cek player benar-benar di area door (full overlap)
-                if (
-                    rect.min.x < playerBody.min.x && rect.max.x > playerBody.max.x &&
-                    rect.min.y < playerBody.min.y && (rect.max.y + 5) > playerBody.max.y
-                ) {
-                    // Syarat: player harus menekan tombol "down" (atau ganti sesuai kontrolmu)
-                    let isPressing = e.player.keys[e.player.controls[3]]; // biasanya "down" atau "s"
-                    e.player.atExit = !!isPressing; // TRUE jika menekan tombol, FALSE jika tidak
+                playerBody = e.bounds
 
-                } else {
-                    // Jika tidak di area door, atExit = false
-                    e.player.atExit = false;
-                }
+            // Cek apakah player sudah benar-benar ada di area pintu
+            let inArea = (
+                rect.min.x < playerBody.min.x && rect.max.x > playerBody.max.x &&
+                rect.min.y < playerBody.min.y && (rect.max.y + 5) > playerBody.max.y
+            );
 
-                // Cek apakah semua player sudah atExit
-                let playerExitCount = 0;
-                this.game.players.forEach(p => {
-                    if (p.atExit) playerExitCount += 1;
-                });
-                if (playerExitCount >= this.playerCount && !window.clientConnection) {
-                    // Semua player sudah masuk door, trigger next level!
-                    e.player.game.renderer.levelTransistion(this.nextLevel);
-                    if (window.hostConnection) {
-                        hostConnection.broadcast(JSON.stringify({
-                            setLevel: this.nextLevel,
-                        }));
-                    }
+            // Deteksi input ArrowDown (atau tombol “masuk” lain)
+            let isPressing = e.player.keys[e.player.controls[3]];
+
+            // Jika player BELUM PERNAH masuk door, dan sekarang benar2 masuk area dan tekan DOWN
+            if (!e.player.enteredDoor && inArea && isPressing) {
+                e.player.enteredDoor = true; // PERMANEN
+                e.player.readyUp(this.trigger.rect.position);
+            }
+            
+            // Hitung jumlah player yang sudah PERNAH masuk door
+            let playerExitCount = 0;
+            this.game.players.forEach(p => {
+                if (p.enteredDoor) playerExitCount += 1;
+            });
+
+            console.log("playerExitCount:", playerExitCount, "playerCount:", this.playerCount);
+
+            // Jika semua player sudah masuk pintu, next level!
+            if (playerExitCount >= this.playerCount && !window.clientConnection) {
+                e.player.game.renderer.levelTransistion(this.nextLevel)
+                if (window.hostConnection) {
+                    hostConnection.broadcast(JSON.stringify({
+                        setLevel: this.nextLevel,
+                    }))
                 }
             }
-        };
+        }
     }
 }
