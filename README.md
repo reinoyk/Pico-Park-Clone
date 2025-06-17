@@ -84,23 +84,15 @@ Build Pico-Park-Clone from the source and install dependencies:
     ❯ cd Pico-Park-Clone
     ```
 
-3. **Install the dependencies:**
-
-**Using [npm](https://www.npmjs.com/):**
+3. **Run the server:**
 
 ```sh
-❯ npm install
+❯ python server.py
 ```
+
+4. **Open index.html and play**
 
 ### Usage
-
-Run the project with:
-
-**Using [npm](https://www.npmjs.com/):**
-
-```sh
-npm start
-```
 
 ## **How to Play**
 
