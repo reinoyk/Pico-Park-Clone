@@ -375,29 +375,22 @@ class Player {
         return ret.length>0
     }
     jump(str=1) {
-        // Hitung total player di game (bisa juga khusus player yg "binded" jika ada)
-        let totalPlayers = this.game.players.length; 
-        let baseJump = 15; // Base jump awal
-        let scale = 0.25; // Makin besar -> jump makin drop kalau player banyak
-
-        // Contoh skema: 1 player = 15, 2 player = 12, 3 player = 10, dst
-        let jumpStrength = (baseJump / (1 + scale * (totalPlayers - 1)));
-        
-        jumpStrength = Math.max(jumpStrength, 5);
+        // Set jumpStrength selalu 13
+        let jumpStrength = 13;
 
         // Deteksi arah kanan dan kiri
-        let rightPressed =  this.keys["ArrowRight"] || this.keys["d"];
-        let leftPressed =  this.keys["ArrowLeft"] || this.keys["a"];
+        let rightPressed = this.keys["ArrowRight"] || this.keys["d"];
+        let leftPressed = this.keys["ArrowLeft"] || this.keys["a"];
         let horizontalBoost = 0;
 
-        if (leftPressed) horizontalBoost =  -3 * str;
-        else if (rightPressed) horizontalBoost = 3 * str;
+        if (leftPressed) horizontalBoost = -30 * str;
+        else if (rightPressed) horizontalBoost = 30 * str;
 
         if (this.ready) {
             this.unReady()
         } else if (this.onGround()) {
             Matter.Body.setVelocity(this.body, v(
-                this.body.velocity.x + horizontalBoost, 
+                horizontalBoost, 
                 -jumpStrength * str
             ))
         }
