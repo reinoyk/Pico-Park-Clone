@@ -86,6 +86,9 @@ class PlayerHandler {
 class Player {
     constructor(game, options) {
         this.game = game
+
+        this.atExit = false;
+        
         options = {
             color:this.game.fetchColor(),
             controls:["arrowleft","arrowright","arrowup","arrowdown"],
