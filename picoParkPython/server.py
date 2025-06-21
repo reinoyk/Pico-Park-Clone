@@ -69,7 +69,7 @@ class GameServer:
         # have finished the current one.
         self.level_order = [
             "one", "two", "three", "four", "five", "six", "seven",
-            "eight", "nine", "ten", "eleven", "tweleve", "thirteen",
+            "eight", "nine", "ten", "eleven", "twelve", "thirteen",
             "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
             "nineteen", "twenty",
         ]
@@ -95,24 +95,22 @@ class GameServer:
         return "red"  # fallback
 
     def get_next_level(self, current_level: str) -> str:
-        """Return the level that should follow ``current_level``.
-
-        If the level is part of ``level_order`` we simply advance to the next
-        one (wrapping around at the end). For special levels defined in
-        ``special_next`` we return the mapped level. If the level isn't known,
-        it is returned unchanged.
-        """
-
         if current_level in self.special_next:
             return self.special_next[current_level]
 
         if current_level in self.level_order:
             idx = self.level_order.index(current_level)
-            return self.level_order[(idx + 1) % len(self.level_order)]
+            if idx + 1 < len(self.level_order):
+                next_level = self.level_order[idx + 1]
+            else:
+                next_level = self.level_order[-1]  # stay on last level
+            logger.info(f"[get_next_level] current: {current_level}, next: {next_level}")
+            return next_level
 
-        # Unknown level name; default to the same level to avoid errors
+        logger.info(f"[get_next_level] current: {current_level}, unknown, return as is")
         return current_level
-    
+
+
     async def handle_create_room(self, websocket, player: Player, data: dict):
         room_id = self.generate_room_id()
         room = Room(room_id, player.id)
@@ -196,14 +194,21 @@ class GameServer:
             
         room = self.rooms.get(player.room_id)
         if room and room.game_started:
+            logger.info(
+                f"[handle_player_update] READY states: " +
+                ", ".join(f"{p.username}:{p.ready}" for p in room.players.values()) +
+                f" | current_level: {room.current_level}"
+            )
             if all(p.ready for p in room.players.values()):
-                # Semua player sudah ready, broadcast level_changed!
-                room.current_level = self.get_next_level(room.current_level)  # bikin/mapping fungsi next level
+                # Semua player sudah ready, ganti level
+                next_level = self.get_next_level(room.current_level)
+                room.current_level = next_level  # UPDATE SEGERA di server!
+                logger.info(f"[BROADCAST] level_changed to: {room.current_level}")
                 await self.broadcast_to_room(room.id, {
                     "type": "level_changed",
                     "level": room.current_level
                 })
-                # Reset ready flag untuk next round
+                # Reset ready untuk next round
                 for p in room.players.values():
                     p.ready = False
             
