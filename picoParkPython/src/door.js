@@ -32,6 +32,10 @@ class Door {
             if (!e.player.enteredDoor && inArea && isPressing) {
                 e.player.enteredDoor = true; // PERMANEN
                 e.player.readyUp(this.trigger.rect.position);
+
+                if (typeof gameClient !== "undefined") {
+                    gameClient.updatePlayer({ ready: true });
+                }
             }
             
             // Hitung jumlah player yang sudah PERNAH masuk door
