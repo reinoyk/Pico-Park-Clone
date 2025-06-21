@@ -44,7 +44,8 @@ class GameManager {
         })
         
         gameClient.on('onLevelChanged', (data) => {
-            this.game.renderer.levelTransistion(data.level)
+            this.game.renderer.levelTransistion(data.level) // animation transition
+            this.game.levelHandler.setLevel(data.level) //set the next level
         })
         
         gameClient.on('onError', (data) => {
