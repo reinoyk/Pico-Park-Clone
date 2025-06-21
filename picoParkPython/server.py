@@ -158,6 +158,19 @@ class GameServer:
         if "dead" in data:
             player.dead = data["dead"]
             
+        room = self.rooms.get(player.room_id)
+        if room and room.game_started:
+            if all(p.ready for p in room.players.values()):
+                # Semua player sudah ready, broadcast level_changed!
+                room.current_level = self.get_next_level(room.current_level)  # bikin/mapping fungsi next level
+                await self.broadcast_to_room(room.id, {
+                    "type": "level_changed",
+                    "level": room.current_level
+                })
+                # Reset ready flag untuk next round
+                for p in room.players.values():
+                    p.ready = False
+            
     async def handle_sync_data(self, websocket, player: Player, data: dict):
         room = self.rooms.get(player.room_id)
         if not room or room.host_id != player.id:
