@@ -64,6 +64,23 @@ class GameServer:
         self.rooms: Dict[str, Room] = {}
         self.players: Dict[str, Player] = {}
         self.colors = ["red", "blue", "yellow", "green", "orange", "pink", "purple", "gray"]
+        # Ordered list of levels as defined on the frontend. This order is
+        # used to determine what the next level should be when all players
+        # have finished the current one.
+        self.level_order = [
+            "one", "two", "three", "four", "five", "six", "seven",
+            "eight", "nine", "ten", "eleven", "tweleve", "thirteen",
+            "fourteen", "fifteen", "sixteen", "seventeen", "eighteen",
+            "nineteen", "twenty",
+        ]
+
+        # Some levels are special and should jump to a custom next level.
+        # These mappings mirror the `nextLevel` values from the level
+        # definitions in the frontend code.
+        self.special_next = {
+            "clancysTempLevel": "tempLevel",
+            "tempName": "tempLevel",
+        }
         
     def generate_room_id(self) -> str:
         words = ["FIRE", "WIND", "MOON", "STAR", "BOLT", "WAVE", "ROCK", "MIST"]
@@ -76,6 +93,25 @@ class GameServer:
             if color not in used_colors:
                 return color
         return "red"  # fallback
+
+    def get_next_level(self, current_level: str) -> str:
+        """Return the level that should follow ``current_level``.
+
+        If the level is part of ``level_order`` we simply advance to the next
+        one (wrapping around at the end). For special levels defined in
+        ``special_next`` we return the mapped level. If the level isn't known,
+        it is returned unchanged.
+        """
+
+        if current_level in self.special_next:
+            return self.special_next[current_level]
+
+        if current_level in self.level_order:
+            idx = self.level_order.index(current_level)
+            return self.level_order[(idx + 1) % len(self.level_order)]
+
+        # Unknown level name; default to the same level to avoid errors
+        return current_level
     
     async def handle_create_room(self, websocket, player: Player, data: dict):
         room_id = self.generate_room_id()
